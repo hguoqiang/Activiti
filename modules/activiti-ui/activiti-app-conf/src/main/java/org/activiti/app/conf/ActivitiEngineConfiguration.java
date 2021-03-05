@@ -12,23 +12,9 @@
  */
 package org.activiti.app.conf;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.sql.DataSource;
-
 import org.activiti.dmn.engine.DmnEngineConfiguration;
 import org.activiti.dmn.engine.configurator.DmnEngineConfigurator;
-import org.activiti.engine.FormService;
-import org.activiti.engine.HistoryService;
-import org.activiti.engine.IdentityService;
-import org.activiti.engine.ManagementService;
-import org.activiti.engine.ProcessEngine;
-import org.activiti.engine.ProcessEngineConfiguration;
-import org.activiti.engine.RepositoryService;
-import org.activiti.engine.RuntimeService;
-import org.activiti.engine.TaskService;
+import org.activiti.engine.*;
 import org.activiti.engine.impl.asyncexecutor.AsyncExecutor;
 import org.activiti.engine.impl.asyncexecutor.DefaultAsyncJobExecutor;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
@@ -43,18 +29,21 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.env.Environment;
 import org.springframework.transaction.PlatformTransactionManager;
 
-@Configuration
+import javax.inject.Inject;
+import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.List;
+
+/*@Configuration
 @ComponentScan(basePackages= {
 		"org.activiti.app.runtime.activiti",
 		"org.activiti.app.extension.conf", // For custom configuration classes
 		"org.activiti.app.extension.bean" // For custom beans (delegates etc.)
-})
+})*/
 public class ActivitiEngineConfiguration {
 
     private final Logger logger = LoggerFactory.getLogger(ActivitiEngineConfiguration.class);

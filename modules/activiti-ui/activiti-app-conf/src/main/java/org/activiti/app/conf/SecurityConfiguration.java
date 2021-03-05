@@ -12,14 +12,7 @@
  */
 package org.activiti.app.conf;
 
-import javax.inject.Inject;
-
-import org.activiti.app.security.AjaxAuthenticationFailureHandler;
-import org.activiti.app.security.AjaxAuthenticationSuccessHandler;
-import org.activiti.app.security.AjaxLogoutSuccessHandler;
-import org.activiti.app.security.CustomDaoAuthenticationProvider;
-import org.activiti.app.security.CustomPersistentRememberMeServices;
-import org.activiti.app.security.Http401UnauthorizedEntryPoint;
+import org.activiti.app.security.*;
 import org.activiti.app.web.CustomFormLoginConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +37,8 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
+
+import javax.inject.Inject;
 
 /**
  * Based on http://docs.spring.io/spring-security/site/docs/3.2.x/reference/htmlsingle/#multiple-httpsecurity
@@ -137,7 +132,7 @@ public class SecurityConfiguration {
 	                .and()
 	            .rememberMe()
 	                .rememberMeServices(rememberMeServices())
-	                .key(env.getProperty("security.rememberme.key"))
+	                .key(env.getProperty("appconf.security.rememberme.key"))
 	                .and()
 	            .logout()
 	                .logoutUrl("/app/logout")
@@ -160,6 +155,9 @@ public class SecurityConfiguration {
 	                .antMatchers("/app/rest/idm/email-actions/*").permitAll()
 	                .antMatchers("/app/rest/idm/signups").permitAll()
 	                .antMatchers("/app/rest/idm/passwords").permitAll()
+	                .antMatchers("/druid/**").authenticated()
+	                .antMatchers("/actuator/**").authenticated()
+	                .antMatchers("/manage/**").authenticated()
 	                .antMatchers("/app/**").authenticated();
 
 	        // Custom login form configurer to allow for non-standard HTTP-methods (eg. LOCK)
@@ -181,7 +179,7 @@ public class SecurityConfiguration {
 	    
 	    @Bean
 	    public RememberMeAuthenticationProvider rememberMeAuthenticationProvider() {
-	        return new RememberMeAuthenticationProvider(env.getProperty("security.rememberme.key"));
+	        return new RememberMeAuthenticationProvider(env.getProperty("appconf.security.rememberme.key"));
 	    }
 	}
 

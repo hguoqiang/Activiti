@@ -12,16 +12,9 @@
  */
 package org.activiti.app.rest.runtime;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.util.ISO8601Utils;
 import org.activiti.app.model.common.ResultListDataRepresentation;
 import org.activiti.app.model.idm.UserRepresentation;
 import org.activiti.app.model.runtime.TaskRepresentation;
@@ -45,9 +38,10 @@ import org.activiti.engine.task.TaskInfo;
 import org.activiti.engine.task.TaskInfoQueryWrapper;
 import org.apache.commons.lang3.StringUtils;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.util.ISO8601Utils;
+import javax.inject.Inject;
+import java.text.ParseException;
+import java.text.ParsePosition;
+import java.util.*;
 
 public abstract class AbstractTaskQueryResource {
 
@@ -217,13 +211,23 @@ public abstract class AbstractTaskQueryResource {
 
   private void handleDueBefore(TaskInfoQueryWrapper taskInfoQueryWrapper, JsonNode dueBeforeNode) {
     String date = dueBeforeNode.asText();
-    Date d = ISO8601Utils.parse(date);
+    Date d = null;
+    try {
+      d = ISO8601Utils.parse(date,new ParsePosition(0));
+    } catch (ParseException e) {
+      e.printStackTrace();
+    }
     taskInfoQueryWrapper.getTaskInfoQuery().taskDueBefore(d);
   }
 
   private void handleDueAfter(TaskInfoQueryWrapper taskInfoQueryWrapper, JsonNode dueAfterNode) {
     String date = dueAfterNode.asText();
-    Date d = ISO8601Utils.parse(date);
+    Date d = null;
+    try {
+      d = ISO8601Utils.parse(date,new ParsePosition(0));
+    } catch (ParseException e) {
+      e.printStackTrace();
+    }
     taskInfoQueryWrapper.getTaskInfoQuery().taskDueAfter(d);
   }
 

@@ -12,16 +12,7 @@
  */
 package org.activiti.app.security;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Date;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.activiti.app.domain.idm.PersistentToken;
-import org.activiti.app.security.ActivitiAppUser;
 import org.activiti.app.service.idm.PersistentTokenService;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.identity.User;
@@ -39,6 +30,12 @@ import org.springframework.security.web.authentication.rememberme.RememberMeAuth
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ReflectionUtils;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * Custom implementation of Spring Security's RememberMeServices.
@@ -84,7 +81,7 @@ public class CustomPersistentRememberMeServices extends AbstractRememberMeServic
 
   @Autowired
   public CustomPersistentRememberMeServices(Environment env, org.springframework.security.core.userdetails.UserDetailsService userDetailsService) {
-    super(env.getProperty("security.rememberme.key"), userDetailsService);
+    super(env.getProperty("appconf.security.rememberme.key"), userDetailsService);
 
     setAlwaysRemember(true);
 
@@ -126,7 +123,7 @@ public class CustomPersistentRememberMeServices extends AbstractRememberMeServic
     PersistentToken token = getPersistentToken(cookieTokens);
 
     // Refresh token if refresh period has been passed
-    if (new Date().getTime() - token.getTokenDate().getTime() > tokenRefreshDurationInMilliseconds) {
+    if (System.currentTimeMillis() - token.getTokenDate().getTime() > tokenRefreshDurationInMilliseconds) {
 
       // log.info("Refreshing persistent login token for user '{}', series '{}'", token.getUserId(), token.getSeries());
       try {
@@ -183,9 +180,14 @@ public class CustomPersistentRememberMeServices extends AbstractRememberMeServic
 
     PersistentToken token = persistentTokenService.getPersistentToken(presentedSeries);
 
-    if (token == null) {
-      // No series match, so we can't authenticate using this cookie
+    try {
+      if (token == null || token.getTokenValue()==null) {
+        // No series match, so we can't authenticate using this cookie
+        throw new RememberMeAuthenticationException("No persistent token found for series id: " + presentedSeries);
+      }
+    } catch (Exception e) {
       throw new RememberMeAuthenticationException("No persistent token found for series id: " + presentedSeries);
+
     }
 
     // We have a match for this user/series combination
@@ -204,7 +206,7 @@ public class CustomPersistentRememberMeServices extends AbstractRememberMeServic
       }
     }
 
-    if (new Date().getTime() - token.getTokenDate().getTime() > tokenMaxAgeInMilliseconds) {
+    if (System.currentTimeMillis() - token.getTokenDate().getTime() > tokenMaxAgeInMilliseconds) {
       throw new RememberMeAuthenticationException("Remember-me login has expired");
     }
     return token;

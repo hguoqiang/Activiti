@@ -12,14 +12,10 @@
  */
 package org.activiti.app.service.idm;
 
-import java.security.SecureRandom;
-import java.util.Date;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.activiti.app.domain.idm.PersistentToken;
 import org.activiti.app.repository.idm.PersistentTokenRepository;
 import org.activiti.engine.identity.User;
@@ -31,10 +27,12 @@ import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.UncheckedExecutionException;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import java.security.SecureRandom;
+import java.util.Date;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Joram Barrez
@@ -73,7 +71,7 @@ public class PersistentTokenServiceImpl implements PersistentTokenService {
         .build(new CacheLoader<String, PersistentToken>() {
 
           public PersistentToken load(final String tokenId) throws Exception {
-            PersistentToken persistentToken = persistentTokenRepository.findOne(tokenId);
+            PersistentToken persistentToken = persistentTokenRepository.getOne(tokenId);
             if (persistentToken != null) {
               return persistentToken;
             } else {
